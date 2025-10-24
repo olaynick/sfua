@@ -266,8 +266,9 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 .faq_button:hover {
     background-color: #edf2f7;
-    border-color: #cbd5e0;
-}
+    border-color: #a2aab3;
+    border: 1px solid;
+} 
 .faq_button:active {
     background-color: #e2e8f0;
 }
