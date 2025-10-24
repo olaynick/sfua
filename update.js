@@ -1,17 +1,17 @@
 // update.js
 const REPO_URL = `https://raw.githubusercontent.com/olaynick/sfua/main/manifest.json?_=${Date.now()}`;
-const STORAGE_KEY = 'sfua_last_update_check';
-const UPDATE_AVAILABLE_KEY = 'sfua_update_available';
-
-async function fetchRemoteVersion() {
-    const res = await fetch(REPO_URL);
-    if (!res.ok) throw new Error('Не удалось загрузить manifest.json');
-    const manifest = await res.json();
-    return manifest.version;
-}
+const STORAGE_KEY_LAST_CHECK = 'sfua_last_update_check';
+const STORAGE_KEY_HAS_UPDATE = 'sfua_update_available';
 
 function getLocalVersion() {
     return chrome.runtime.getManifest().version;
+}
+
+async function fetchRemoteVersion() {
+    const res = await fetch(REPO_URL);
+    if (!res.ok) throw new Error('Failed to fetch remote manifest');
+    const manifest = await res.json();
+    return manifest.version;
 }
 
 function isVersionNewer(remote, local) {
@@ -26,53 +26,51 @@ function isVersionNewer(remote, local) {
     return false;
 }
 
-async function checkForUpdate(showPopup = false) {
+async function checkForUpdate() {
     const local = getLocalVersion();
     let remote;
     try {
         remote = await fetchRemoteVersion();
     } catch (e) {
-        console.error('[SFUA Update] Ошибка проверки обновления:', e);
+        console.error('[SFUA Update] Ошибка загрузки версии:', e);
         return false;
     }
 
     const hasUpdate = isVersionNewer(remote, local);
     const now = Date.now();
 
-    chrome.storage.local.set({
-        [STORAGE_KEY]: now,
-        [UPDATE_AVAILABLE_KEY]: hasUpdate
+    await chrome.storage.local.set({
+        [STORAGE_KEY_LAST_CHECK]: now,
+        [STORAGE_KEY_HAS_UPDATE]: hasUpdate
     });
 
-    if (showPopup) {
+    // Обновляем UI в popup, если он открыт
+    const btn = document.querySelector('.update_button');
+    if (btn) {
         if (hasUpdate) {
-            showUpdatePopup();
+            btn.className = 'update_button has-update';
+            btn.disabled = false;
         } else {
-            const btn = document.querySelector('.update_button');
-            if (btn) {
-                const original = btn.textContent;
-                btn.textContent = 'Нет новых версий';
-                setTimeout(() => { btn.textContent = original; }, 3000);
-            }
+            btn.className = 'update_button no-update';
+            btn.disabled = true;
         }
+        btn.textContent = 'Обновить';
     }
 
-    return hasUpdate;
+    return { hasUpdate, remote, local };
 }
 
-function showUpdatePopup() {
-    chrome.runtime.sendMessage({ action: 'showUpdateModal' });
-}
-
+// Проверка раз в час и при запуске
 async function autoCheck() {
-    const result = await chrome.storage.local.get([STORAGE_KEY]);
-    const lastCheck = result[STORAGE_KEY] || 0;
+    const result = await chrome.storage.local.get([STORAGE_KEY_LAST_CHECK]);
+    const lastCheck = result[STORAGE_KEY_LAST_CHECK] || 0;
     const now = Date.now();
-    const sevenDays = 7 * 24 * 60 * 60 * 1000;
+    const oneHour = 60 * 60 * 1000;
 
-    if (now - lastCheck > sevenDays) {
-        await checkForUpdate(false);
+    if (now - lastCheck > oneHour) {
+        await checkForUpdate();
     }
 }
 
-window.sfuaUpdate = { checkForUpdate, autoCheck };
+// Экспорт для popup.js
+window.sfuaUpdate = { autoCheck, checkForUpdate };

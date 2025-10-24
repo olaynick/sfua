@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const STORAGE_KEY = `sfua_popup_state_tab_${currentTabId}`;
     const ERROR_SEARCH_DONE_KEY = `sfua_error_search_done_tab_${currentTabId}`;
     const SEARCH_IN_PROGRESS_KEY = `sfua_search_in_progress_tab_${currentTabId}`;
+    const STORAGE_KEY_HAS_UPDATE = 'sfua_update_available';
 
     function disableErrorSearchButton() {
         errorSearchButton.disabled = true;
@@ -271,28 +272,25 @@ document.addEventListener('DOMContentLoaded', async function () {
         const updateBtn = document.querySelector('.update_button');
         if (!updateBtn) return;
 
-        chrome.storage.local.get(['sfua_update_available'], (result) => {
-            if (result.sfua_update_available) {
-                updateBtn.textContent = 'Обновить';
+        updateBtn.textContent = 'Обновить';
+
+        chrome.storage.local.get([STORAGE_KEY_HAS_UPDATE], (result) => {
+            const hasUpdate = result[STORAGE_KEY_HAS_UPDATE] || false;
+            if (hasUpdate) {
+                updateBtn.className = 'update_button has-update';
+                updateBtn.disabled = false;
+            } else {
+                updateBtn.className = 'update_button no-update';
+                updateBtn.disabled = true;
             }
         });
 
-        updateBtn.addEventListener('click', async () => {
-            if (updateBtn.textContent.trim() === 'Обновить') {
-                showUpdatePopup();
-                return;
-            }
-
-            updateBtn.disabled = true;
-            const original = updateBtn.textContent;
-            try {
-                await window.sfuaUpdate.checkForUpdate(true);
-            } finally {
-                updateBtn.disabled = false;
-                if (updateBtn.textContent !== 'Нет новых версий') {
-                    updateBtn.textContent = original;
+        updateBtn.addEventListener('click', () => {
+            chrome.storage.local.get([STORAGE_KEY_HAS_UPDATE], (result) => {
+                if (result[STORAGE_KEY_HAS_UPDATE]) {
+                    showUpdatePopup();
                 }
-            }
+            });
         });
     }
 
