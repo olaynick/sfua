@@ -1,0 +1,190 @@
+/* progress_error.css */
+
+/* === Основной контейнер === */
+.sfua_error_container {
+    width: 100%;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    z-index: 10000;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 12px;
+    color: #4a5568;
+    position: relative;
+    margin: 10px auto 8px;
+    box-sizing: border-box;
+}
+
+.sfua_error_container.pinned {
+    position: fixed;
+    top: -40px;
+    left: 25%;
+    transform: translateX(-50%);
+    width: 1200px;
+    margin: 0 !important;
+    z-index: 10001;
+    animation: slideDown 0.3s forwards;
+}
+
+@keyframes slideDown {
+    from { top: -40px; }
+    to { top: 10px; }
+}
+
+.sfua_error_container.pinned:not(.following) {
+    position: static;
+    margin: 10px auto 8px;
+}
+
+/* Круги */
+.sfua_error_container .circle_wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+}
+
+.sfua_error_container .progress_circle {
+    width: 20px;
+    height: 20px;
+    background-color: #edf2f7;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+/* Заголовок */
+.sfua_error_container .progress_header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0;
+    width: 100%;
+}
+
+.sfua_error_container .progress_circles {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 6px;
+    width: 100%;
+    max-width: 180px;
+}
+
+.sfua_error_container .current_operation {
+    text-align: center;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+/* Результаты */
+.sfua_error_container .results_container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 12px 8px;
+    max-height: 100px;
+    overflow-y: auto;
+    justify-content: center;
+}
+
+/* Кнопки результатов */
+.sfua_error_container .results_container .sfua_error_result_item {
+    padding: 5px 10px;
+    background-color: #f7fafc;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #4a5568;
+    cursor: pointer;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: 
+        opacity 0.2s ease,
+        transform 0.2s ease;
+}
+
+/* Появление */
+.sfua_error_container .results_container .sfua_error_result_item {
+    opacity: 0;
+    transform: translateY(4px);
+}
+
+/* Обычный hover */
+.sfua_error_container .results_container .sfua_error_result_item:hover {
+    background-color: rgb(203, 212, 221) !important;
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(255, 68, 62, 0.15);
+    transition: 
+        background-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.1s ease,
+        box-shadow 0.2s ease,
+        border 0.2s ease;
+}
+
+/* hover для крэшей */
+.sfua_error_container .results_container .sfua_error_result_item[is-crash]:hover {
+    background-color: #feb2b2 !important;
+    color: #9b2c2c !important;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(255, 68, 62, 0.2);
+    transform: translateY(-1px);
+}
+
+/* Модальное окно */
+.sfua_error_tooltip {
+    position: fixed;
+    top: 400px;
+    left: 50%;
+    transform: translateX(-50%) scale(0);
+    max-width: 700px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #4a5568;
+    z-index: 20000;
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.4;
+    transform-origin: center;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.sfua_error_tooltip_text {
+    flex: 1;
+}
+
+.sfua_error_tooltip_buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+.sfua_error_tooltip_btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 20%;
+    background-color: rgb(237, 242, 247);
+    color: rgb(74, 85, 104);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.sfua_error_tooltip_btn:hover {
+    transform: scale(1.05);
+}

@@ -1,0 +1,127 @@
+/* progress.css */
+
+/* === Основной контейнер === */
+.sfua_result_container {
+    width: 100%;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    z-index: 10000;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 12px;
+    color: #4a5568;
+    position: relative;
+    margin: 10px auto 8px;
+    box-sizing: border-box;
+}
+
+/* Режим "закреплён" — фиксированная позиция И только если following */
+.sfua_result_container.pinned.following {
+    position: fixed;
+    top: -40px;
+    left: 25%;
+    transform: translateX(-50%);
+    width: 1200px;
+    margin: 0 !important;
+    z-index: 10001;
+    animation: slideDown 0.3s forwards;
+}
+
+@keyframes slideDown {
+    from { top: -40px; }
+    to { top: 10px; }
+}
+
+.sfua_result_container.pinned:not(.following) {
+    position: static;
+    margin: 10px auto 8px;
+}
+
+/* Круги */
+.sfua_result_container .circle_wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+}
+
+.sfua_result_container .progress_circle {
+    width: 20px;
+    height: 20px;
+    background-color: #edf2f7;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+/* Заголовок */
+.sfua_result_container .progress_header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0;
+    width: 100%;
+}
+
+.sfua_result_container .progress_circles {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 6px;
+    width: 100%;
+    max-width: 180px;
+}
+
+.sfua_result_container .current_operation {
+    text-align: center;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+/* Результаты */
+.sfua_result_container .results_container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 12px 8px;
+    max-height: 100px;
+    overflow-y: auto;
+    justify-content: center;
+}
+
+/* Кнопки результатов */
+.sfua_result_container .results_container .sfua_result_item {
+    padding: 5px 10px;
+    background-color: #f7fafc; /* Светлее, чем #edf2f7 */
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #4a5568;
+    cursor: pointer;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: 
+        opacity 0.2s ease,
+        transform 0.2s ease;
+}
+
+/* Появление */
+.sfua_result_container .results_container .sfua_result_item {
+    opacity: 0;
+    transform: translateY(4px);
+}
+
+.sfua_result_container .results_container .sfua_result_item:hover {
+    background-color: rgb(203, 212, 221) !important;
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(66, 153, 225, 0.2);
+    transition: 
+        background-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.1s ease,
+        box-shadow 0.2s ease,
+        border 0.2s ease;
+}

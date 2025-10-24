@@ -1,0 +1,55 @@
+{
+  "manifest_version": 3,
+  "name": "SFUA FE",
+  "version": "6.3.52",
+  "description": "Автоматизация анализа пользовательских сессий в Яндекс AppMetrica",
+  "permissions": ["scripting", "activeTab", "storage", "tabs", "webNavigation"],
+  "host_permissions": ["*://appmetrica.yandex.ru/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://appmetrica.yandex.ru/*"],
+      "js": [
+        "content/showcurrent.js",
+        "content/usertimezone.js",
+        "content/scrolltotop.js",
+        "content/sync_manual_clicks.js"],
+      "all_frames": true,
+      "run_at": "document_end"
+    }
+  ],
+"web_accessible_resources": [
+  {
+    "resources": [
+      "data/timezones.json",
+      "actions/*.js",
+      "background/*.js",
+      "content/styles/showcurrent.css",
+      "background/styles/*.css",
+      "content/styles/*.css",
+      "content/*.js",
+      "styles.css",
+      "modal_error.js",
+      "*.js",
+      "*.css",
+      "*.html"
+    ],
+    "matches": ["<all_urls>"]
+  }
+],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

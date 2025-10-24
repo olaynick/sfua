@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>SFUA</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="popup.js" defer></script>
+</head>
+<body>
+    <div class="sfua_container">
+        <div class="section">
+            <h3>Тип события</h3>
+            <div class="event_types">
+                <span class="event_type active">tap</span>
+                <span class="event_type">open_screen</span>
+                <span class="event_type">condition</span>
+                <span class="event_type">event</span>
+                <span class="event_type">authorization</span>
+                <span class="event_type">tabbar</span>
+                <span class="event_type">deeplink</span>
+                <span class="event_type">tech</span>
+                <span class="event_type">error</span>
+                <span class="event_type">open_error</span>
+                <span class="event_type">open_error_screen</span>
+                <span class="event_type">errorMetric</span>
+                <span class="event_type">offline_tap</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Параметры</h3>
+            <div class="params_row">
+                <input class="param_key" type="text" value="%">
+                <span class="equals">=</span>
+                <input class="param_value" type="text" value="обновить данные">
+            </div>
+        </div>
+
+        <!-- Кнопки в одной строке -->
+        <div class="buttons_row">
+            <button class="search_button">Начать поиск</button>
+            <button class="error_search_button">
+                <span class="error_icon"></span>
+                <span class="error_text">Ошибки</span>
+            </button>
+        </div>
+
+        <!-- Кнопка FAQ -->
+        <div class="faq_row">
+            <button class="faq_button">Краткое руководство</button>
+        </div>
+    </div>
+</body>
+</html>

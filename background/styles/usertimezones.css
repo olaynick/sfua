@@ -1,0 +1,20 @@
+.user_time {
+    color: #999;
+    font-size: 0.9em;
+    margin-left: 3px;
+    position: relative;
+}
+
+.user_time:hover::after {
+    content: "Время сессии в часовом поясе пользователя";
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 1000;
+    bottom: 100%;
+    left: 0;
+}
