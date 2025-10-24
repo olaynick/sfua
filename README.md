@@ -6,7 +6,7 @@
 
 ## 📥 Скачать расширение
 
-Последняя версия: **[sfua.zip](https://github.com/olaynick/sfua/releases/latest/download/sfua.zip)**  
+Последняя версия: **[sfua.zip](https://github.com/olaynick/sfua/archive/refs/heads/main.zip)**  
 (архив содержит все файлы из ветки `main`)
 
 > ⚠️ Чтобы установить:  
