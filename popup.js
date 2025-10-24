@@ -1,15 +1,12 @@
 // popup.js
-
 document.addEventListener('DOMContentLoaded', async function () {
     const eventTypes = document.querySelectorAll('.event_type');
     const searchButton = document.querySelector('.search_button');
     const errorSearchButton = document.querySelector('.error_search_button');
     const paramKey = document.querySelector('.param_key');
     const paramValue = document.querySelector('.param_value');
-
     let currentTabId = null;
 
-    // Получаем активную вкладку AppMetrica
     try {
         const tabs = await chrome.tabs.query({
             active: true,
@@ -24,7 +21,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         console.error('SFUA: Ошибка получения вкладки:', err);
     }
 
-    // Если AppMetrica не открыта
     if (!currentTabId) {
         document.querySelector('.sfua_container').innerHTML = `
             <div style="text-align: center; color: #718096; font-size: 12px; padding: 20px;">
@@ -38,7 +34,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     const ERROR_SEARCH_DONE_KEY = `sfua_error_search_done_tab_${currentTabId}`;
     const SEARCH_IN_PROGRESS_KEY = `sfua_search_in_progress_tab_${currentTabId}`;
 
-    // === Функции управления состоянием кнопки "Поиск ошибок" ===
     function disableErrorSearchButton() {
         errorSearchButton.disabled = true;
         errorSearchButton.style.opacity = '0.6';
@@ -51,30 +46,22 @@ document.addEventListener('DOMContentLoaded', async function () {
         errorSearchButton.title = 'Поиск всех ошибок (включая Крэш)';
     }
 
-    // === Проверка состояния поиска ошибок ===
     async function checkErrorSearchState() {
         const result = await chrome.storage.local.get([ERROR_SEARCH_DONE_KEY]);
         const isDone = result[ERROR_SEARCH_DONE_KEY] === true;
         const hasActiveContainer = !!document.querySelector('.sfua_error_container');
-
         if (isDone && !hasActiveContainer) {
-            // Поиск был завершён, но контейнера нет → можно запустить снова
             enableErrorSearchButton();
-            // Очищаем устаревший флаг
             chrome.storage.local.remove(ERROR_SEARCH_DONE_KEY);
         } else if (isDone && hasActiveContainer) {
-            // Поиск завершён и контейнер активен → нельзя запускать
             disableErrorSearchButton();
         } else {
-            // Никаких следов поиска → разрешаем
             enableErrorSearchButton();
         }
     }
 
-    // === Загрузка сохранённого состояния ===
     const result = await chrome.storage.local.get([STORAGE_KEY, ERROR_SEARCH_DONE_KEY, SEARCH_IN_PROGRESS_KEY]);
     const saved = result[STORAGE_KEY];
-
     if (saved) {
         eventTypes.forEach(type => {
             if (type.textContent.trim() === saved.eventType) {
@@ -89,7 +76,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         eventTypes[0].classList.add('active');
     }
 
-    // === Проверка состояния обычного поиска ===
     if (result[SEARCH_IN_PROGRESS_KEY]) {
         searchButton.disabled = true;
         searchButton.textContent = 'Идёт поиск…';
@@ -98,7 +84,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         searchButton.title = 'Поиск событий по совпадению ключ:значение за выбранный период';
     }
 
-    // === Переключение активного типа события ===
     eventTypes.forEach(type => {
         type.addEventListener('click', () => {
             eventTypes.forEach(t => t.classList.remove('active'));
@@ -106,11 +91,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             saveState();
         });
     });
-
     paramKey.addEventListener('input', saveState);
     paramValue.addEventListener('input', saveState);
 
-    // === Сохранение состояния ===
     function saveState() {
         const activeType = document.querySelector('.event_type.active');
         const state = {
@@ -123,7 +106,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         chrome.storage.local.set(changes);
     }
 
-    // === Карта типов событий ===
     const typesMap = {
         'tap': 0, 'open_screen': 1, 'condition': 2, 'event': 3,
         'authorization': 4, 'tabbar': 5, 'deeplink': 6, 'tech': 7,
@@ -131,11 +113,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         'errorMetric': 11, 'offline_tap': 12
     };
 
-    // === Обработчик кнопки "Поиск ошибок" ===
     errorSearchButton.addEventListener('click', async () => {
         saveState();
-
-        // Проверяем, существует ли вкладка
         let tab;
         try {
             tab = await chrome.tabs.get(currentTabId);
@@ -149,7 +128,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             return;
         }
 
-        // Проверяем, загружен ли iframe
         let iframeReady = false;
         try {
             const result = await chrome.scripting.executeScript({
@@ -163,7 +141,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         } catch (e) {
             console.warn('SFUA: Ошибка проверки iframe:', e);
         }
-
         if (!iframeReady) {
             const retry = confirm('AppMetrica ещё не загружена. Подождать и попробовать снова?');
             if (retry) {
@@ -172,13 +149,11 @@ document.addEventListener('DOMContentLoaded', async function () {
                 setTimeout(() => {
                     errorSearchButton.disabled = false;
                     errorSearchButton.textContent = 'Ошибки';
-                    // Пользователь может нажать снова
                 }, 3000);
             }
             return;
         }
 
-        // Устанавливаем флаг
         chrome.storage.local.set({ [ERROR_SEARCH_DONE_KEY]: true }, () => {
             if (chrome.runtime.lastError) {
                 console.warn('Не удалось сохранить состояние поиска ошибок:', chrome.runtime.lastError);
@@ -188,7 +163,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             disableErrorSearchButton();
         });
 
-        // Отправляем запрос
         try {
             await chrome.runtime.sendMessage({
                 action: "executeStartErrorSearch",
@@ -202,24 +176,14 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     });
 
-    // === Обработчик кнопки "Начать поиск" ===
     async function startSearch(eventType, key, value) {
         saveState();
-
-        // Блокируем кнопку
         searchButton.disabled = true;
         const originalText = searchButton.textContent;
         searchButton.textContent = 'Идёт поиск…';
         searchButton.title = 'Идёт поиск. Чтобы начать новый, нужно дождаться завершения или обновить страницу';
+        chrome.storage.local.set({ [SEARCH_IN_PROGRESS_KEY]: true });
 
-        // Устанавливаем флаг, что поиск идёт
-        chrome.storage.local.set({ [SEARCH_IN_PROGRESS_KEY]: true }, () => {
-            if (chrome.runtime.lastError) {
-                console.warn('Не удалось сохранить состояние поиска:', chrome.runtime.lastError);
-            }
-        });
-
-        // Сбрасываем флаги проверки параметров
         try {
             await chrome.runtime.sendMessage({
                 action: "resetParamCheckFlags",
@@ -229,7 +193,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             console.warn("SFUA: Не удалось сбросить флаги", err);
         }
 
-        // Отправляем запрос на запуск поиска
         try {
             const response = await chrome.runtime.sendMessage({
                 action: "startSearch",
@@ -238,24 +201,18 @@ document.addEventListener('DOMContentLoaded', async function () {
                 value: value,
                 tabId: currentTabId
             });
-
             if (response && !response.success) {
                 throw new Error(response.error);
             }
-
-            // Через 1 сек разблокируем кнопку
             setTimeout(() => {
                 if (searchButton.disabled) {
                     searchButton.disabled = false;
                     searchButton.textContent = originalText;
                     searchButton.title = 'Поиск событий по совпадению ключ:значение за выбранный период';
                 }
-                // Удаляем флаг
                 chrome.storage.local.remove(SEARCH_IN_PROGRESS_KEY);
             }, 1000);
-
             window.close();
-
         } catch (error) {
             console.error('SFUA: Ошибка при запуске поиска:', error);
             setTimeout(() => {
@@ -277,26 +234,16 @@ document.addEventListener('DOMContentLoaded', async function () {
         startSearch(eventType, paramKey.value, paramValue.value);
     });
 
-// === Обработчик кнопки FAQ ===
-const faqButton = document.querySelector('.faq_button');
-if (faqButton) {
-    faqButton.addEventListener('click', () => {
-        console.log('[Popup] Открываем FAQ на странице');
-        chrome.runtime.sendMessage({
-            action: "showHowToUse"
+    // === FAQ ===
+    const faqButton = document.querySelector('.faq_button');
+    if (faqButton) {
+        faqButton.addEventListener('click', () => {
+            chrome.runtime.sendMessage({ action: "showHowToUse" });
+            window.close();
         });
-        window.close();
-    });
-}
+    }
 
-function injectHowToUse() {
-    const script = document.createElement('script');
-    script.src = chrome.runtime.getURL('how_to_use.js');
-    script.onload = () => script.remove();
-    (document.head || document.documentElement).appendChild(script);
-}
-
-    // === Горячие клавиши: Ctrl+Enter ===
+    // === Горячие клавиши ===
     function handleCtrlEnter(e) {
         if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
             e.preventDefault();
@@ -307,28 +254,66 @@ function injectHowToUse() {
             startSearch(eventType, paramKey.value, paramValue.value);
         }
     }
-
     paramKey.addEventListener('keydown', handleCtrlEnter);
     paramValue.addEventListener('keydown', handleCtrlEnter);
 
-    // === Проверка состояния при старте ===
+    // === Обновление ===
+    const updateScript = document.createElement('script');
+    updateScript.src = chrome.runtime.getURL('update.js');
+    updateScript.onload = () => {
+        updateScript.remove();
+        initUpdateButton();
+        window.sfuaUpdate.autoCheck();
+    };
+    document.head.appendChild(updateScript);
+
+    function initUpdateButton() {
+        const updateBtn = document.querySelector('.update_button');
+        if (!updateBtn) return;
+
+        chrome.storage.local.get(['sfua_update_available'], (result) => {
+            if (result.sfua_update_available) {
+                updateBtn.textContent = 'Обновить';
+            }
+        });
+
+        updateBtn.addEventListener('click', async () => {
+            if (updateBtn.textContent.trim() === 'Обновить') {
+                showUpdatePopup();
+                return;
+            }
+
+            updateBtn.disabled = true;
+            const original = updateBtn.textContent;
+            try {
+                await window.sfuaUpdate.checkForUpdate(true);
+            } finally {
+                updateBtn.disabled = false;
+                if (updateBtn.textContent !== 'Нет новых версий') {
+                    updateBtn.textContent = original;
+                }
+            }
+        });
+    }
+
+    function showUpdatePopup() {
+        chrome.runtime.sendMessage({ action: 'showUpdateModal' });
+        window.close();
+    }
+
     checkErrorSearchState();
 
-    // === Следим за обновлением вкладки ===
     chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         if (tabId === currentTabId && changeInfo.status === 'complete' && tab.url.includes('appmetrica.yandex.ru')) {
-            console.log('[Popup] Вкладка обновлена — проверяем состояние поиска ошибок');
             checkErrorSearchState();
         }
     });
 
-    // === Следим за активацией вкладки ===
     chrome.tabs.onActivated.addListener(async (activeInfo) => {
         if (activeInfo.tabId === currentTabId) {
             try {
                 const tab = await chrome.tabs.get(currentTabId);
                 if (tab.url?.includes('appmetrica.yandex.ru')) {
-                    console.log('[Popup] Вкладка активирована — проверяем состояние');
                     checkErrorSearchState();
                 }
             } catch (e) {
