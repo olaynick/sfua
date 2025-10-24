@@ -214,21 +214,27 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             await chrome.scripting.executeScript({
                 target: { tabId: tab.id },
                 func: (localVer, remoteVer) => {
+                    // Удаляем предыдущие модалки и стили
                     document.querySelectorAll('.sfua_update_modal_overlay').forEach(el => el.remove());
+                    document.querySelectorAll('style[data-sfua-update-modal]').forEach(el => el.remove());
 
+                    // Инжектим стили
                     const style = document.createElement('style');
+                    style.setAttribute('data-sfua-update-modal', '');
                     style.textContent = `
                         .sfua_update_modal_overlay {
                             position: fixed;
                             top: 0; left: 0; width: 100%; height: 100%;
-                            background: rgba(0,0,0,0.6);
-                            display: flex; align-items: center; justify-content: center;
+                            background: rgba(0, 0, 0, 0.6);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
                             z-index: 2147483647;
                         }
                         .sfua_update_modal {
                             background: white;
                             border-radius: 12px;
-                            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
                             padding: 24px;
                             color: #2d3748;
                             font-size: 14px;
@@ -268,35 +274,46 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     `;
                     document.head.appendChild(style);
 
+                    // Создаём модалку
                     const overlay = document.createElement('div');
                     overlay.className = 'sfua_update_modal_overlay';
                     overlay.innerHTML = `
                         <div class="sfua_update_modal">
                             <div>Текущая версия: ${localVer}. Новая версия: ${remoteVer}. Скачать новую версию?</div>
                             <div class="sfua_update_modal_buttons">
-                                <a href="https://github.com/olaynick/sfua/archive/refs/heads/main.zip" target="_blank" style="text-decoration: none;">
-                                    <button class="sfua_update_modal_button yes">Да</button>
-                                </a>
+                                <button class="sfua_update_modal_button yes">Да</button>
                                 <button class="sfua_update_modal_button no">Нет</button>
                             </div>
                         </div>
                     `;
                     document.body.appendChild(overlay);
 
+                    // Функция закрытия
                     const close = () => {
                         overlay.remove();
                         style.remove();
                     };
+
+                    // Обработчики
+                    overlay.querySelector('.yes').addEventListener('click', (e) => {
+                        e.preventDefault();
+                        window.open('https://github.com/olaynick/sfua/archive/refs/heads/main.zip', '_blank');
+                        close();
+                    });
+
                     overlay.querySelector('.no').addEventListener('click', close);
                     overlay.addEventListener('click', (e) => {
                         if (e.target === overlay) close();
                     });
-                    document.addEventListener('keydown', (e) => {
+
+                    // Закрытие по Esc
+                    const handleEsc = (e) => {
                         if (e.key === 'Escape') {
                             close();
-                            document.removeEventListener('keydown', arguments.callee);
+                            document.removeEventListener('keydown', handleEsc);
                         }
-                    });
+                    };
+                    document.addEventListener('keydown', handleEsc);
                 },
                 args: [local, remote]
             });
