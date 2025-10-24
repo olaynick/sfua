@@ -1,5 +1,5 @@
 // update.js
-const REPO_URL = 'https://raw.githubusercontent.com/olaynick/sfua/main/manifest.json';
+const REPO_URL = `https://raw.githubusercontent.com/olaynick/sfua/main/manifest.json?_=${Date.now()}`;
 const STORAGE_KEY = 'sfua_last_update_check';
 const UPDATE_AVAILABLE_KEY = 'sfua_update_available';
 

@@ -172,8 +172,8 @@ if (request.action === "showUpdateModal") {
                 modal.className = 'sfua_update_modal';
                 modal.style.cssText = `
                     position: fixed;
-                    top: 20px;
-                    right: 20px;
+                    top: 50%;
+                    right: 40%;
                     background: white;
                     border: 1px solid #ccc;
                     border-radius: 8px;
@@ -186,7 +186,7 @@ if (request.action === "showUpdateModal") {
                 `;
                 modal.innerHTML = `
                     <div>Загрузить новую версию?</div>
-                    <div style="margin-top: 12px; display: flex; gap: 8px;">
+                    <div style="margin-top: 12px; display: flex; gap: 8px; align-items: center; justify-content: space-around;">
                         <a href="https://github.com/olaynick/sfua/archive/refs/heads/main.zip" target="_blank" style="text-decoration: none;">
                             <button class="sfua_update_yes">Да</button>
                         </a>
