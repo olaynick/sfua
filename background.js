@@ -155,53 +155,51 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         sendResponse({ success: true });
         return true;
     }
-    // === Обработка модального окна обновления ===
-    if (request.action === "showUpdateModal") {
-        chrome.tabs.query({
-            active: true,
-            currentWindow: true,
-            url: '*://appmetrica.yandex.ru/*'
-        }, (tabs) => {
-            const tab = tabs.find(t => t.url.includes('appmetrica.yandex.ru'));
-            if (!tab) return;
-            chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                func: () => {
-                    if (document.querySelector('.sfua_update_modal')) return;
-                    const modal = document.createElement('div');
-                    modal.className = 'sfua_update_modal';
-                    modal.style.cssText = `
-                        position: fixed;
-                        top: 20px;
-                        right: 20px;
-                        background: white;
-                        border: 1px solid #ccc;
-                        border-radius: 8px;
-                        padding: 16px;
-                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                        z-index: 2147483647;
-                        max-width: 300px;
-                        font-family: sans-serif;
-                        font-size: 14px;
-                    `;
-                    modal.innerHTML = `
-                        <div>Доступна новая версия. Перейти на <a href="https://github.com/olaynick/sfua" target="_blank">https://github.com/olaynick/sfua</a> для загрузки?</div>
-                        <div style="margin-top: 12px; display: flex; gap: 8px;">
+// === Обработка модального окна обновления ===
+if (request.action === "showUpdateModal") {
+    chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+        url: '*://appmetrica.yandex.ru/*'
+    }, (tabs) => {
+        const tab = tabs.find(t => t.url.includes('appmetrica.yandex.ru'));
+        if (!tab) return;
+        chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: () => {
+                if (document.querySelector('.sfua_update_modal')) return;
+                const modal = document.createElement('div');
+                modal.className = 'sfua_update_modal';
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: white;
+                    border: 1px solid #ccc;
+                    border-radius: 8px;
+                    padding: 16px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    z-index: 2147483647;
+                    max-width: 300px;
+                    font-family: sans-serif;
+                    font-size: 14px;
+                `;
+                modal.innerHTML = `
+                    <div>Загрузить новую версию?</div>
+                    <div style="margin-top: 12px; display: flex; gap: 8px;">
+                        <a href="https://github.com/olaynick/sfua/archive/refs/heads/main.zip" target="_blank" style="text-decoration: none;">
                             <button class="sfua_update_yes">Да</button>
-                            <button class="sfua_update_no">Нет</button>
-                        </div>
-                    `;
-                    document.body.appendChild(modal);
-                    modal.querySelector('.sfua_update_yes').onclick = () => {
-                        window.open('https://github.com/olaynick/sfua', '_blank');
-                        modal.remove();
-                    };
-                    modal.querySelector('.sfua_update_no').onclick = () => modal.remove();
-                }
-            });
+                        </a>
+                        <button class="sfua_update_no">Нет</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                modal.querySelector('.sfua_update_no').onclick = () => modal.remove();
+            }
         });
-        return true;
-    }
+    });
+    return true;
+}
     // Определение целевой вкладки
     let targetTabId;
     if (request.tabId) {
